@@ -20,5 +20,17 @@ const connectionRequestSchema = new mongoose.Schema({
     }
     
 },{timestamps:true}) 
+
+connectionRequestSchema.pre("save",function(next){
+    const connectionRequest=this;
+    //check fromUser equal to toUserId or not
+    if(connectionRequest.fromUserId.equals(connectionRequest.toUserId)){
+        throw new Error("fromUserId and toUserId cannot be equal");
+    }
+    next();
+
+})
+//compound index to make query faster
+connectionRequestSchema.index({fromUserId:1,toUserId:1}, {unique:true});
 const ConnectionRequestModel = mongoose.model("ConnectionRequest", connectionRequestSchema);
 module.exports = ConnectionRequestModel
