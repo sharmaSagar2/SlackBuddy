@@ -65,6 +65,9 @@ userRouter.get('/feed',userAuth ,async (req,res)=>{
 
     try {
         const loggedInUser = req.user;
+        const page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+        limit=limit>100?100:limit
         //find all connection requests(send+received)
         const connectionRequests=await ConnectionRequest.find({
             $or:[{fromUserId:loggedInUser._id},{toUserId:loggedInUser._id}],
@@ -82,7 +85,7 @@ userRouter.get('/feed',userAuth ,async (req,res)=>{
                 { _id: { $nin: Array.from(hideUserFromFeed).map(id => new mongoose.Types.ObjectId(id)) } },
                 { _id: { $ne: loggedInUser._id } }
             ]
-        }).select("firstName lastName photoUrl age gender about skills")
+        }).select("firstName lastName photoUrl age gender about skills").skip( (page-1)*limit).limit(limit);
         res.json({
             message:"It's your feed",
             data:users
