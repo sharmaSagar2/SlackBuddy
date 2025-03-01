@@ -63,7 +63,6 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async(req,res)=
     const loggedInUser=req.user;
     const allowedStatus = ["accepted", "rejected"];
     const{ status,requestId} = req.params;
-    console.log("requestId",requestId);
     if(!allowedStatus.includes(status)){
         return res.status(400).json({
             message: "Invalid status type " + status,
@@ -73,7 +72,7 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async(req,res)=
       _id: requestId,
       toUserId: loggedInUser._id,
       status:"interested"
-    })
+    }).populate("fromUserId")
     if(!connectionRequest){
       return res.status(400).json({
         message: "Connection request not found",
@@ -82,8 +81,8 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async(req,res)=
     connectionRequest.status=status;
     const data = await connectionRequest.save();
     res.json({
-        message:`${loggedInUser.firstName} has ${status} the connection request from ${connectionRequest.fromUserId.firstName}`,
-        data
+      message: `${loggedInUser.firstName} has ${status} the connection request from ${connectionRequest.fromUserId.firstName}`,
+      data
     });
     
   } catch (error) {
